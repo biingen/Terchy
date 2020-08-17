@@ -33,6 +33,7 @@
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.serialPort2 = new System.IO.Ports.SerialPort(this.components);
             this.button_start = new System.Windows.Forms.Button();
+            this.label_temperature = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button_setting
@@ -55,16 +56,27 @@
             this.button_start.UseVisualStyleBackColor = true;
             this.button_start.Click += new System.EventHandler(this.button_start_Click);
             // 
+            // label_temperature
+            // 
+            this.label_temperature.AutoSize = true;
+            this.label_temperature.Location = new System.Drawing.Point(12, 17);
+            this.label_temperature.Name = "label_temperature";
+            this.label_temperature.Size = new System.Drawing.Size(70, 12);
+            this.label_temperature.TabIndex = 2;
+            this.label_temperature.Text = "Temperature: ";
+            // 
             // Terchy
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 261);
+            this.Controls.Add(this.label_temperature);
             this.Controls.Add(this.button_start);
             this.Controls.Add(this.button_setting);
             this.Name = "Terchy";
             this.Text = "Terchy";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -74,6 +86,7 @@
         private System.IO.Ports.SerialPort serialPort1;
         private System.IO.Ports.SerialPort serialPort2;
         private System.Windows.Forms.Button button_start;
+        private System.Windows.Forms.Label label_temperature;
     }
 }
 

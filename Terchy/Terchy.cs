@@ -17,6 +17,7 @@ namespace Terchy
     {
         private string Config_Path = Application.StartupPath + "\\Config.ini";
         string serialPort1_text, serialPort2_text;
+        bool start_button;
 
         const int byteMessage_max_Hex = 16;
         const int byteMessage_max_Ascii = 256;
@@ -26,7 +27,10 @@ namespace Terchy
         byte[] byteMessage_B = new byte[Math.Max(byteMessage_max_Ascii, byteMessage_max_Hex)];
         int byteMessage_length_B = 0;
 
-        bool start_button;
+        const int byteTemperature_max = 64;
+        byte[] byteTemperature = new byte[byteTemperature_max];
+        int byteTemperature_length = 0;
+        double currentTemperature = 0;
 
         public Terchy()
         {
@@ -78,6 +82,7 @@ namespace Terchy
                     {
                         byte input_ch = dataset[index];
                         serialPort1_recorder(input_ch);
+                        btm4208sd_temperature(input_ch);
                     }
                 }
             }
@@ -166,6 +171,172 @@ namespace Terchy
             {
                 byteMessage_B[byteMessage_length_B] = ch;
                 byteMessage_length_B++;
+            }
+        }
+
+        private void btm4208sd_temperature(byte ch)
+        {
+            const int packet_len = 16;
+            const int header_offset_1 = -16;
+            const int header_offset_2 = -15;
+            const int temp_ch_offset = -14;
+            const int temp_unit_02 = -13;
+            const int temp_unit_01 = -12;
+            const int temp_polarity_offset = -11;
+            const int temp_dp_offset = -10;
+            const int temp_data8_offset = -9;
+            const int temp_data7_offset = -8;
+            const int temp_data6_offset = -7;
+            const int temp_data5_offset = -6;
+            const int temp_data4_offset = -5;
+            const int temp_data3_offset = -4;
+            const int temp_data2_offset = -3;
+            const int temp_data1_offset = -2;
+            const double temp_abs_value = 0.05;
+
+            // If data_buffer is too long, cut off data not needed
+            if (byteTemperature_length >= byteTemperature_max)
+            {
+                int destinationIndex = 0;
+                for (int i = (byteTemperature_max - packet_len); i < byteTemperature_max; i++)
+                {
+                    byteTemperature[destinationIndex++] = byteTemperature[i];
+                }
+                byteTemperature_length = destinationIndex;
+            }
+
+            byteTemperature[byteTemperature_length] = ch;
+            byteTemperature_length++;
+
+            if (ch == 0x0D)
+            {
+                if (((byteTemperature_length + header_offset_1) >= 0) &&
+                     (byteTemperature[byteTemperature_length + header_offset_1] == 0x02) &&
+                     (byteTemperature[byteTemperature_length + header_offset_2] == '4'))
+                {
+                    // Channel number is checked and ok here
+                    if ((byteTemperature[byteTemperature_length + temp_unit_02] == '0'))
+                    {
+                        if ((byteTemperature[byteTemperature_length + temp_unit_01] == '1')
+                            || (byteTemperature[byteTemperature_length + temp_unit_01] == '2'))
+                        {
+                            if ((byteTemperature[byteTemperature_length + temp_data1_offset] != 0x18))
+                            {
+                                // data is valid
+                                int DP_convert = '0';
+                                int byteArray_position = 0;
+                                byte[] byteArray = new byte[8];
+                                for (int pos = byteTemperature_length + temp_data8_offset;
+                                            pos <= (byteTemperature_length + temp_data1_offset);
+                                            pos++)
+                                {
+                                    byteArray[byteArray_position] = byteTemperature[pos];
+                                    byteArray_position++;
+                                }
+
+                                string tempSubstring = System.Text.Encoding.Default.GetString(byteArray);
+                                double digit = Math.Pow(10, Convert.ToInt64(byteTemperature[byteTemperature_length + temp_dp_offset] - DP_convert));
+                                currentTemperature = Convert.ToDouble(Convert.ToInt32(tempSubstring) / digit);
+
+                                // is value negative?
+                                if (byteTemperature[byteTemperature_length + temp_polarity_offset] == '1')
+                                {
+                                    currentTemperature = -currentTemperature;
+                                }
+
+                                // is value Fahrenheit?
+                                if (byteTemperature[byteTemperature_length + temp_unit_01] == '2')
+                                {
+                                    currentTemperature = (currentTemperature - 32) / 1.8;
+                                    currentTemperature = Math.Round((currentTemperature), 2, MidpointRounding.AwayFromZero);
+                                }
+                            }
+                        }
+                    }
+
+
+                    string dataValue;
+                    // Channel number is checked and ok here
+                    if ((byteTemperature[byteTemperature_length + temp_unit_02] == '0'))
+                    {
+                        if ((byteTemperature[byteTemperature_length + temp_unit_01] == '1')
+                            || (byteTemperature[byteTemperature_length + temp_unit_01] == '2'))
+                        {
+                            if ((byteTemperature[byteTemperature_length + temp_data1_offset] != 0x18))
+                            {
+                                int DP_convert = '0';
+                                int byteArray_position = 0;
+                                byte[] byteArray = new byte[8];
+                                for (int pos = byteTemperature_length + temp_data8_offset;
+                                            pos <= (byteTemperature_length + temp_data1_offset);
+                                            pos++)
+                                {
+                                    byteArray[byteArray_position] = byteTemperature[pos];
+                                    byteArray_position++;
+                                }
+
+                                string tempSubstring = System.Text.Encoding.Default.GetString(byteArray);
+                                double digit = Math.Pow(10, Convert.ToInt64(byteTemperature[byteTemperature_length + temp_dp_offset] - DP_convert));
+                                if (tempSubstring != "000\u0018\u0018\u0018\u0018\n")
+                                {
+                                    double nowTemperature = Convert.ToDouble(Convert.ToInt32(tempSubstring) / digit);
+
+                                    // is value negative?
+                                    if (byteTemperature[byteTemperature_length + temp_polarity_offset] == '1')
+                                    {
+                                        nowTemperature = -nowTemperature;
+                                    }
+
+                                    // is value Fahrenheit?
+                                    if (byteTemperature[byteTemperature_length + temp_unit_01] == '2')
+                                    {
+                                        nowTemperature = (nowTemperature - 32) / 1.8;
+                                        nowTemperature = Math.Round((nowTemperature), 2, MidpointRounding.AwayFromZero);
+                                    }
+
+                                    // is channel value?
+                                    int vOut = Convert.ToInt32(byteTemperature[byteTemperature_length + temp_ch_offset]) - 48;
+                                    if (vOut > 10)
+                                        vOut = vOut - 7;
+                                    string channel = vOut.ToString("#00");
+
+                                    dataValue = "CH" + channel + " = " + nowTemperature.ToString("#00.0") + " °C";
+                                    UpdateUI("Temperature: " + dataValue, label_temperature);
+                                }
+                                else
+                                {
+                                    dataValue = "CH:--" + "=----";
+                                }
+                            }
+                            else
+                            {
+                                // is channel value?
+                                int vOut = Convert.ToInt32(byteTemperature[byteTemperature_length + temp_ch_offset]) - 48;
+                                if (vOut > 10)
+                                    vOut = vOut - 7;
+                                string channel = vOut.ToString("#00");
+
+                                dataValue = "CH:" + channel + "=----";
+                            }
+                        }
+                    }
+                }
+                byteTemperature_length = 0;
+            }
+        }
+
+        //執行緒控制label.text
+        private delegate void UpdateUICallBack_Text(string value, Control ctl);
+        private void UpdateUI(string value, Control ctl)
+        {
+            if (InvokeRequired)
+            {
+                UpdateUICallBack_Text uu = new UpdateUICallBack_Text(UpdateUI);
+                Invoke(uu, value, ctl);
+            }
+            else
+            {
+                ctl.Text = value;
             }
         }
 
