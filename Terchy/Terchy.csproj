@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CRC_Calc.cs" />
     <Compile Include="Setting.cs">
       <SubType>Form</SubType>
     </Compile>
