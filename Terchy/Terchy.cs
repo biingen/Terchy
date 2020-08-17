@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -24,6 +25,8 @@ namespace Terchy
         int byteMessage_length_A = 0;
         byte[] byteMessage_B = new byte[Math.Max(byteMessage_max_Ascii, byteMessage_max_Hex)];
         int byteMessage_length_B = 0;
+
+        bool start_button;
 
         public Terchy()
         {
@@ -163,6 +166,43 @@ namespace Terchy
             {
                 byteMessage_B[byteMessage_length_B] = ch;
                 byteMessage_length_B++;
+            }
+        }
+
+        private void button_start_Click(object sender, EventArgs e)
+        {
+            Thread LogAThread = new Thread(new ThreadStart(serialPort1_analysis));
+            Thread LogBThread = new Thread(new ThreadStart(serialPort2_analysis));
+
+            start_button = !start_button;
+            if (start_button == true)
+            {
+                button_start.Text = "Stop";
+                if (ini12.INIRead(Config_Path, "serialPort1", "Exist", "") == "1" && serialPort1.IsOpen == false)          //送至Comport
+                {
+                    Open_serialPort1();
+                    LogAThread.Start();
+                }
+
+                if (ini12.INIRead(Config_Path, "serialPort2", "Exist", "") == "1" && serialPort2.IsOpen == false)          //送至Comport
+                {
+                    Open_serialPort2();
+                    LogBThread.Start();
+                }
+            }
+            else
+            {
+                button_start.Text = "Start";
+                if (serialPort1.IsOpen == true)          //送至Comport
+                {
+                    LogAThread.Abort();
+                    Close_serialPort1();
+                }
+                if (serialPort2.IsOpen == true)          //送至Comport
+                {
+                    LogBThread.Abort();
+                    Close_serialPort2();
+                }
             }
         }
 
