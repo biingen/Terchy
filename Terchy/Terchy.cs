@@ -301,7 +301,7 @@ namespace Terchy
                                     string channel = vOut.ToString("#00");
 
                                     dataValue = "CH" + channel + " = " + nowTemperature.ToString("#00.0") + " °C";
-                                    UpdateUI("Temperature: " + dataValue, label_temperature);
+                                    UpdateUI("Temperature Recorder: " + dataValue, label_temperatureRec);
                                 }
                                 else
                                 {
@@ -374,6 +374,84 @@ namespace Terchy
                     LogBThread.Abort();
                     Close_serialPort2();
                 }
+            }
+        }
+
+        private void button_set_Click(object sender, EventArgs e)
+        {
+            string temperature_total, temperature_crc16, temperature_16, temperature_Low, temperature_High;
+            string humidity_total, humidity_crc16, humidity_16, humidity_Low, humidity_High;
+            string slope_total, slope_crc16, slope_16, slope_Low, slope_High;
+            string start_total, start_crc16;
+            int temperature_number, temperature_value;
+            int humidity_number, humidity_value;
+            int slope_number, slope_value;
+            bool textBox_temperature_bool = Int32.TryParse(textBox_chamberTemp.Text, out temperature_number);
+            bool textBox_humidity_bool = Int32.TryParse(textBox_chamberHum.Text, out humidity_number);
+            bool textBox_slope_bool = Int32.TryParse(textBox_chamberSlope.Text, out slope_number);
+
+            if (textBox_temperature_bool)
+                temperature_value = temperature_number * 100;
+            else
+                temperature_value = 0;
+
+            if (textBox_humidity_bool)
+                humidity_value = humidity_number * 100;
+            else
+                humidity_value = 0;
+
+            if (textBox_slope_bool)
+                slope_value = slope_number;
+            else
+                slope_value = 0;
+
+            if (temperature_value != 0 && serialPort2.IsOpen == true)
+            {
+                temperature_16 = Convert.ToString(temperature_value, 16).PadLeft(4, '0');
+                temperature_Low = temperature_16.Substring(0, 2);     //低位數
+                temperature_High = temperature_16.Substring(2);       //高位數
+                temperature_total = "01 06 00 02 " + temperature_Low + " " + temperature_High;
+                temperature_crc16 = Crc16.PID_CRC16(temperature_total);
+                temperature_total += temperature_crc16;
+                byte[] Outputbytes = new byte[temperature_total.Split(' ').Count()];
+                Outputbytes = HexConverter.StrToByte(temperature_total);
+                serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
+            }
+
+            if (humidity_value != 0 && serialPort2.IsOpen == true)
+            {
+                humidity_16 = Convert.ToString(humidity_value, 16).PadLeft(4, '0');
+                humidity_Low = humidity_16.Substring(0, 2);     //低位數
+                humidity_High = humidity_16.Substring(2);       //高位數
+                humidity_total = "01 06 00 0C " + humidity_Low + " " + humidity_High;
+                humidity_crc16 = Crc16.PID_CRC16(humidity_total);
+                humidity_total += humidity_crc16;
+                byte[] Outputbytes = new byte[humidity_total.Split(' ').Count()];
+                Outputbytes = HexConverter.StrToByte(humidity_total);
+                serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
+            }
+
+            if (slope_value != 0 && serialPort2.IsOpen == true)
+            {
+                slope_16 = Convert.ToString(slope_value, 16).PadLeft(4, '0');
+                slope_Low = slope_16.Substring(0, 2);     //低位數
+                slope_High = slope_16.Substring(2);       //高位數
+                slope_total = "01 06 00 33 " + slope_Low + " " + slope_High;
+                slope_crc16 = Crc16.PID_CRC16(slope_total);
+                slope_total += slope_crc16;
+                byte[] Outputbytes = new byte[slope_total.Split(' ').Count()];
+                Outputbytes = HexConverter.StrToByte(slope_total);
+                serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
+            }
+
+            if (temperature_value != 0 || humidity_value != 0 || slope_value != 0 && serialPort2.IsOpen == true)
+            {
+                start_total = "01 06 00 1E 00 01";
+                start_crc16 = Crc16.PID_CRC16(start_total);
+                start_total += start_crc16;
+                byte[] Outputbytes = new byte[start_total.Split(' ').Count()];
+                Outputbytes = HexConverter.StrToByte(start_total);
+                serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
             }
         }
 
