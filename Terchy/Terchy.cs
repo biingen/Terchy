@@ -405,7 +405,7 @@ namespace Terchy
             else
                 slope_value = 0;
 
-            if (temperature_value != 0 && serialPort2.IsOpen == true)
+            if (temperature_value >= 0 && serialPort2.IsOpen == true)   //正值
             {
                 temperature_16 = Convert.ToString(temperature_value, 16).PadLeft(4, '0');
                 temperature_Low = temperature_16.Substring(0, 2);     //低位數
@@ -417,8 +417,21 @@ namespace Terchy
                 Outputbytes = HexConverter.StrToByte(temperature_total);
                 serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
             }
+            else if (temperature_value < 0 && serialPort2.IsOpen == true)   //負值
+            {
+                temperature_value = 65536 + temperature_value;
+                temperature_16 = Convert.ToString(temperature_value, 16).PadLeft(4, 'F');
+                temperature_Low = temperature_16.Substring(0, 2);     //低位數
+                temperature_High = temperature_16.Substring(2);       //高位數
+                temperature_total = "01 06 00 02 " + temperature_Low + " " + temperature_High;
+                temperature_crc16 = Crc16.PID_CRC16(temperature_total);
+                temperature_total += temperature_crc16;
+                byte[] Outputbytes = new byte[temperature_total.Split(' ').Count()];
+                Outputbytes = HexConverter.StrToByte(temperature_total);
+                serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
+            }
 
-            if (humidity_value != 0 && serialPort2.IsOpen == true)
+            if (humidity_value >= 0 && serialPort2.IsOpen == true)
             {
                 humidity_16 = Convert.ToString(humidity_value, 16).PadLeft(4, '0');
                 humidity_Low = humidity_16.Substring(0, 2);     //低位數
@@ -431,7 +444,7 @@ namespace Terchy
                 serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
             }
 
-            if (slope_value != 0 && serialPort2.IsOpen == true)
+            if (slope_value >= 0 && serialPort2.IsOpen == true)
             {
                 slope_16 = Convert.ToString(slope_value, 16).PadLeft(4, '0');
                 slope_Low = slope_16.Substring(0, 2);     //低位數
