@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Terchy
 {
@@ -349,6 +351,11 @@ namespace Terchy
             if (start_button == true)
             {
                 button_start.Text = "Stop";
+                if (ini12.INIRead(Config_Path, "Schedule", "Exist", "") == "1")          //讀取Schedule
+                {
+                    ReadingCSV(ini12.INIRead(Config_Path, "Schedule", "Path", ""));
+                }
+
                 if (ini12.INIRead(Config_Path, "serialPort1", "Exist", "") == "1" && serialPort1.IsOpen == false)          //送至Comport
                 {
                     Open_serialPort1();
@@ -475,6 +482,41 @@ namespace Terchy
             if (Setting.ShowDialog() == DialogResult.Cancel)
             {
                 
+            }
+        }
+
+        private void ReadingCSV(string schedulefile)
+        {
+            int i = 0;
+            var reader = new StreamReader(File.OpenRead(schedulefile));
+            if ((File.Exists(schedulefile) == true))
+            {
+                dataGridView_Schedule.Rows.Clear();
+                TextFieldParser parser = new TextFieldParser(schedulefile);
+                parser.Delimiters = new string[] { "," };
+                string[] parts = new string[3];
+                while (!parser.EndOfData)
+                {
+                    try
+                    {
+                        parts = parser.ReadFields();
+                        if (parts == null)
+                        {
+                            break;
+                        }
+
+                        if (i != 0)
+                        {
+                            dataGridView_Schedule.Rows.Add(parts);
+                        }
+                        i++;
+                    }
+                    catch (MalformedLineException)
+                    {
+                        MessageBox.Show("Schedule cannot contain double quote ( \" \" ).", "Schedule foramt error");
+                    }
+                }
+                parser.Close();
             }
         }
     }

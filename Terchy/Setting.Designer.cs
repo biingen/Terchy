@@ -41,6 +41,10 @@
             this.comboBox_serialPort1_portname = new System.Windows.Forms.ComboBox();
             this.label_serialPort1_baudrate = new System.Windows.Forms.Label();
             this.label_serialPort1_portname = new System.Windows.Forms.Label();
+            this.textBox_Schedule = new System.Windows.Forms.TextBox();
+            this.button_Schedule = new System.Windows.Forms.Button();
+            this.SchOpen1 = new System.Windows.Forms.OpenFileDialog();
+            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.groupBox_serialPort2.SuspendLayout();
             this.groupBox_serialPort1.SuspendLayout();
             this.SuspendLayout();
@@ -223,11 +227,35 @@
             this.label_serialPort1_portname.TabIndex = 2;
             this.label_serialPort1_portname.Text = "Portname:";
             // 
+            // textBox_Schedule
+            // 
+            this.textBox_Schedule.Location = new System.Drawing.Point(4, 289);
+            this.textBox_Schedule.Name = "textBox_Schedule";
+            this.textBox_Schedule.Size = new System.Drawing.Size(178, 22);
+            this.textBox_Schedule.TabIndex = 72;
+            this.textBox_Schedule.TextChanged += new System.EventHandler(this.textBox_Schedule_TextChanged);
+            // 
+            // button_Schedule
+            // 
+            this.button_Schedule.Location = new System.Drawing.Point(188, 289);
+            this.button_Schedule.Name = "button_Schedule";
+            this.button_Schedule.Size = new System.Drawing.Size(75, 23);
+            this.button_Schedule.TabIndex = 73;
+            this.button_Schedule.Text = "Schedule";
+            this.button_Schedule.UseVisualStyleBackColor = true;
+            this.button_Schedule.Click += new System.EventHandler(this.button_Schedule_Click);
+            // 
+            // SchOpen1
+            // 
+            this.SchOpen1.FileName = "SchOpen1";
+            // 
             // Setting
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(267, 290);
+            this.ClientSize = new System.Drawing.Size(267, 362);
+            this.Controls.Add(this.button_Schedule);
+            this.Controls.Add(this.textBox_Schedule);
             this.Controls.Add(this.label_serialPort_status);
             this.Controls.Add(this.groupBox_serialPort2);
             this.Controls.Add(this.groupBox_serialPort1);
@@ -257,5 +285,9 @@
         private System.Windows.Forms.ComboBox comboBox_serialPort1_portname;
         private System.Windows.Forms.Label label_serialPort1_baudrate;
         private System.Windows.Forms.Label label_serialPort1_portname;
+        private System.Windows.Forms.TextBox textBox_Schedule;
+        private System.Windows.Forms.Button button_Schedule;
+        private System.Windows.Forms.OpenFileDialog SchOpen1;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog;
     }
 }
