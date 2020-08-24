@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.VisualBasic.FileIO;
+using System.Timers;
 
 namespace Terchy
 {
@@ -344,8 +345,42 @@ namespace Terchy
             }
         }
 
+        //執行緒控制 datagriveiew
+        private delegate void UpdateUICallBack1(string value, DataGridView ctl);
+        private void GridUI(string i, DataGridView gv)
+        {
+            if (InvokeRequired)
+            {
+                UpdateUICallBack1 uu = new UpdateUICallBack1(GridUI);
+                Invoke(uu, i, gv);
+            }
+            else
+            {
+                dataGridView_Schedule.ClearSelection();
+                gv.Rows[int.Parse(i)].Selected = true;
+            }
+        }
+
+        // 執行緒控制 datagriverew的scorllingbar
+        private delegate void UpdateUICallBack3(string value, DataGridView ctl);
+        private void Gridscroll(string i, DataGridView gv)
+        {
+            if (InvokeRequired)
+            {
+                UpdateUICallBack3 uu = new UpdateUICallBack3(Gridscroll);
+                Invoke(uu, i, gv);
+            }
+            else
+            {
+                //DataGridView1.ClearSelection();
+                //gv.Rows[int.Parse(i)].Selected = true;
+                gv.FirstDisplayedScrollingRowIndex = int.Parse(i);
+            }
+        }
+
         private void button_start_Click(object sender, EventArgs e)
         {
+            Thread MainThread = new Thread(new ThreadStart(MyRunSchedule));
             Thread LogAThread = new Thread(new ThreadStart(serialPort1_analysis));
             Thread LogBThread = new Thread(new ThreadStart(serialPort2_analysis));
 
@@ -365,6 +400,8 @@ namespace Terchy
                     Open_serialPort2();
                     LogBThread.Start();
                 }
+
+                MainThread.Start();
             }
             else
             {
@@ -379,6 +416,8 @@ namespace Terchy
                     LogBThread.Abort();
                     Close_serialPort2();
                 }
+
+                MainThread.Abort();
             }
         }
 
@@ -496,6 +535,70 @@ namespace Terchy
             }
         }
 
+        private void MyRunSchedule()
+        {
+            int Scheduler_Row, temperature_number, temperature_value, SysDelay = 0;
+            string temperature_total, slope_total;
+            for (Scheduler_Row = 0; Scheduler_Row < dtTable.Rows.Count - 1; Scheduler_Row++)
+            {
+                string columns_temperature = dtTable.Rows[Scheduler_Row][0].ToString().Trim();
+                string columns_time = dtTable.Rows[Scheduler_Row][1].ToString().Trim();
+                string columns_percentage = dtTable.Rows[Scheduler_Row][2].ToString().Trim();
+
+                if (start_button == false)
+                {
+                    break;
+                }
+
+                if (columns_time != "")
+                {
+                    if (columns_time.Contains('m'))
+                    {
+                        GridUI(Scheduler_Row.ToString(), dataGridView_Schedule);//控制Datagridview highlight//
+                        Gridscroll(Scheduler_Row.ToString(), dataGridView_Schedule);//控制Datagridview scollbar//
+                    }
+                    else
+                    {
+                        if (int.Parse(columns_time) > 500)  //DataGridView UI update 
+                        {
+                            GridUI(Scheduler_Row.ToString(), dataGridView_Schedule);//控制Datagridview highlight//
+                            Gridscroll(Scheduler_Row.ToString(), dataGridView_Schedule);//控制Datagridview scollbar//
+                        }
+                    }
+                }
+
+                if (columns_time != "" && int.TryParse(columns_time, out SysDelay) == true && columns_time.Contains('m') == false)
+                    SysDelay = int.Parse(columns_time); // 指令停止時間(毫秒)
+                else if (columns_time != "" && columns_time.Contains('m') == true)
+                    SysDelay = int.Parse(columns_time.Replace('m', ' ').Trim()) * 60000; // 指令停止時間(分)
+                else
+                    SysDelay = 0;
+
+                bool columns_temperature_bool = Int32.TryParse(columns_temperature, out temperature_number);
+                if (columns_temperature_bool)
+                    temperature_value = temperature_number * 100;
+                else
+                    temperature_value = 0;
+
+                if (temperature_value != 0)
+                {
+                    temperature_total = chamber_temperature_calculate(temperature_value);
+                    byte[] Outputbytes = new byte[temperature_total.Split(' ').Count()];
+                    Outputbytes = HexConverter.StrToByte(temperature_total);
+                    serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
+                }
+
+                if (SysDelay > 0)
+                {
+                    slope_total = chamber_slope_calculate(SysDelay / 60000);
+                    byte[] Outputbytes = new byte[slope_total.Split(' ').Count()];
+                    Outputbytes = HexConverter.StrToByte(slope_total);
+                    serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
+                    RedRatDBViewer_Delay(SysDelay);
+                }
+            }
+        }
+
         private string chamber_temperature_calculate(int temperature_value)
         {
             string temperature_total, temperature_crc16, temperature_16, temperature_Low, temperature_High;
@@ -561,6 +664,31 @@ namespace Terchy
                 slope_total = "0";
             }
             return slope_total;
+        }
+
+        // 這個主程式專用的delay的內部資料與function
+        static bool Delay_TimeOutIndicator = false;
+        private void Delay_OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            Delay_TimeOutIndicator = true;
+        }
+
+        private void RedRatDBViewer_Delay(int delay_ms)
+        {
+            if (delay_ms <= 0) return;
+            System.Timers.Timer Delay_Timer = new System.Timers.Timer(delay_ms);
+            Delay_Timer.Elapsed += new ElapsedEventHandler(Delay_OnTimedEvent);
+            Delay_TimeOutIndicator = false;
+            Delay_Timer.Enabled = true;
+            Delay_Timer.Start();
+            while (Delay_TimeOutIndicator == false)
+            {
+                Application.DoEvents();
+                System.Threading.Thread.Sleep(1);//釋放CPU//
+            }
+
+            Delay_Timer.Stop();
+            Delay_Timer.Dispose();
         }
     }
 }
