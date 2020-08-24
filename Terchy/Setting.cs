@@ -56,6 +56,8 @@ namespace Terchy
             comboBox_serialPort1_portname.Text = ini12.INIRead(Config_Path, "serialPort1", "PortName", "");
             comboBox_serialPort2_baudrate.Text = ini12.INIRead(Config_Path, "serialPort2", "BaudRate", "");
             comboBox_serialPort2_portname.Text = ini12.INIRead(Config_Path, "serialPort2", "PortName", "");
+
+            textBox_Schedule.Text = ini12.INIRead(Config_Path, "Schedule", "Path", "");
         }
 
         private void serialPort1_enable_CheckedChanged(object sender, EventArgs e)

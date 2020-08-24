@@ -34,6 +34,8 @@ namespace Terchy
         int byteTemperature_length = 0;
         double currentTemperature = 0;
 
+        DataTable dtTable = new DataTable();
+
         public Terchy()
         {
             InitializeComponent();
@@ -351,10 +353,6 @@ namespace Terchy
             if (start_button == true)
             {
                 button_start.Text = "Stop";
-                if (ini12.INIRead(Config_Path, "Schedule", "Exist", "") == "1")          //讀取Schedule
-                {
-                    ReadingCSV(ini12.INIRead(Config_Path, "Schedule", "Path", ""));
-                }
 
                 if (ini12.INIRead(Config_Path, "serialPort1", "Exist", "") == "1" && serialPort1.IsOpen == false)          //送至Comport
                 {
@@ -386,9 +384,7 @@ namespace Terchy
 
         private void button_set_Click(object sender, EventArgs e)
         {
-            string temperature_total, temperature_crc16, temperature_16, temperature_Low, temperature_High;
-            string humidity_total, humidity_crc16, humidity_16, humidity_Low, humidity_High;
-            string slope_total, slope_crc16, slope_16, slope_Low, slope_High;
+            string temperature_total, humidity_total, slope_total;
             string start_total, start_crc16;
             int temperature_number, temperature_value;
             int humidity_number, humidity_value;
@@ -412,53 +408,25 @@ namespace Terchy
             else
                 slope_value = 0;
 
-            if (temperature_value >= 0 && serialPort2.IsOpen == true)   //正值
+            if (serialPort2.IsOpen == true)
             {
-                temperature_16 = Convert.ToString(temperature_value, 16).PadLeft(4, '0');
-                temperature_Low = temperature_16.Substring(0, 2);     //低位數
-                temperature_High = temperature_16.Substring(2);       //高位數
-                temperature_total = "01 06 00 02 " + temperature_Low + " " + temperature_High;
-                temperature_crc16 = Crc16.PID_CRC16(temperature_total);
-                temperature_total += temperature_crc16;
-                byte[] Outputbytes = new byte[temperature_total.Split(' ').Count()];
-                Outputbytes = HexConverter.StrToByte(temperature_total);
-                serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
-            }
-            else if (temperature_value < 0 && serialPort2.IsOpen == true)   //負值
-            {
-                temperature_value = 65536 + temperature_value;
-                temperature_16 = Convert.ToString(temperature_value, 16).PadLeft(4, 'F');
-                temperature_Low = temperature_16.Substring(0, 2);     //低位數
-                temperature_High = temperature_16.Substring(2);       //高位數
-                temperature_total = "01 06 00 02 " + temperature_Low + " " + temperature_High;
-                temperature_crc16 = Crc16.PID_CRC16(temperature_total);
-                temperature_total += temperature_crc16;
+                temperature_total = chamber_temperature_calculate(temperature_value);
                 byte[] Outputbytes = new byte[temperature_total.Split(' ').Count()];
                 Outputbytes = HexConverter.StrToByte(temperature_total);
                 serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
             }
 
-            if (humidity_value >= 0 && serialPort2.IsOpen == true)
+            if (serialPort2.IsOpen == true)
             {
-                humidity_16 = Convert.ToString(humidity_value, 16).PadLeft(4, '0');
-                humidity_Low = humidity_16.Substring(0, 2);     //低位數
-                humidity_High = humidity_16.Substring(2);       //高位數
-                humidity_total = "01 06 00 0C " + humidity_Low + " " + humidity_High;
-                humidity_crc16 = Crc16.PID_CRC16(humidity_total);
-                humidity_total += humidity_crc16;
+                humidity_total = chamber_humidity_calculate(humidity_value);
                 byte[] Outputbytes = new byte[humidity_total.Split(' ').Count()];
                 Outputbytes = HexConverter.StrToByte(humidity_total);
                 serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
             }
 
-            if (slope_value >= 0 && serialPort2.IsOpen == true)
+            if (serialPort2.IsOpen == true)
             {
-                slope_16 = Convert.ToString(slope_value, 16).PadLeft(4, '0');
-                slope_Low = slope_16.Substring(0, 2);     //低位數
-                slope_High = slope_16.Substring(2);       //高位數
-                slope_total = "01 06 00 33 " + slope_Low + " " + slope_High;
-                slope_crc16 = Crc16.PID_CRC16(slope_total);
-                slope_total += slope_crc16;
+                slope_total = chamber_slope_calculate(slope_value);
                 byte[] Outputbytes = new byte[slope_total.Split(' ').Count()];
                 Outputbytes = HexConverter.StrToByte(slope_total);
                 serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
@@ -481,7 +449,10 @@ namespace Terchy
 
             if (Setting.ShowDialog() == DialogResult.Cancel)
             {
-                
+                if (ini12.INIRead(Config_Path, "Schedule", "Exist", "") == "1")          //讀取Schedule
+                {
+                    ReadingCSV(ini12.INIRead(Config_Path, "Schedule", "Path", ""));
+                }
             }
         }
 
@@ -491,10 +462,15 @@ namespace Terchy
             var reader = new StreamReader(File.OpenRead(schedulefile));
             if ((File.Exists(schedulefile) == true))
             {
-                dataGridView_Schedule.Rows.Clear();
+                dtTable.Columns.Clear();
+                dtTable.Rows.Clear();
                 TextFieldParser parser = new TextFieldParser(schedulefile);
                 parser.Delimiters = new string[] { "," };
                 string[] parts = new string[3];
+                dataGridView_Schedule.DataSource = dtTable;
+                dtTable.Columns.Add("Temperature", typeof(string));
+                dtTable.Columns.Add("Time", typeof(string));
+                dtTable.Columns.Add("Percentage", typeof(float));
                 while (!parser.EndOfData)
                 {
                     try
@@ -507,7 +483,7 @@ namespace Terchy
 
                         if (i != 0)
                         {
-                            dataGridView_Schedule.Rows.Add(parts);
+                            dtTable.Rows.Add(parts);
                         }
                         i++;
                     }
@@ -518,6 +494,73 @@ namespace Terchy
                 }
                 parser.Close();
             }
+        }
+
+        private string chamber_temperature_calculate(int temperature_value)
+        {
+            string temperature_total, temperature_crc16, temperature_16, temperature_Low, temperature_High;
+            if (temperature_value >= 0)   //正值
+            {
+                temperature_16 = Convert.ToString(temperature_value, 16).PadLeft(4, '0');
+                temperature_Low = temperature_16.Substring(0, 2);     //低位數
+                temperature_High = temperature_16.Substring(2);       //高位數
+                temperature_total = "01 06 00 02 " + temperature_Low + " " + temperature_High;
+                temperature_crc16 = Crc16.PID_CRC16(temperature_total);
+                temperature_total += temperature_crc16;
+            }
+            else if (temperature_value < 0)   //負值
+            {
+                temperature_value = 65536 + temperature_value;
+                temperature_16 = Convert.ToString(temperature_value, 16).PadLeft(4, 'F');
+                temperature_Low = temperature_16.Substring(0, 2);     //低位數
+                temperature_High = temperature_16.Substring(2);       //高位數
+                temperature_total = "01 06 00 02 " + temperature_Low + " " + temperature_High;
+                temperature_crc16 = Crc16.PID_CRC16(temperature_total);
+                temperature_total += temperature_crc16;
+            }
+            else
+            {
+                temperature_total = "0";
+            }
+            return temperature_total;
+        }
+
+        private string chamber_humidity_calculate(int humidity_value)
+        {
+            string humidity_total, humidity_crc16, humidity_16, humidity_Low, humidity_High;
+            if (humidity_value >= 0)   //正值
+            {
+                humidity_16 = Convert.ToString(humidity_value, 16).PadLeft(4, '0');
+                humidity_Low = humidity_16.Substring(0, 2);     //低位數
+                humidity_High = humidity_16.Substring(2);       //高位數
+                humidity_total = "01 06 00 0C " + humidity_Low + " " + humidity_High;
+                humidity_crc16 = Crc16.PID_CRC16(humidity_total);
+                humidity_total += humidity_crc16;
+            }
+            else
+            {
+                humidity_total = "0";
+            }
+            return humidity_total;
+        }
+
+        private string chamber_slope_calculate(int slope_value)
+        {
+            string slope_total, slope_crc16, slope_16, slope_Low, slope_High;
+            if (slope_value >= 0)   //正值
+            {
+                slope_16 = Convert.ToString(slope_value, 16).PadLeft(4, '0');
+                slope_Low = slope_16.Substring(0, 2);     //低位數
+                slope_High = slope_16.Substring(2);       //高位數
+                slope_total = "01 06 00 33 " + slope_Low + " " + slope_High;
+                slope_crc16 = Crc16.PID_CRC16(slope_total);
+                slope_total += slope_crc16;
+            }
+            else
+            {
+                slope_total = "0";
+            }
+            return slope_total;
         }
     }
 }
