@@ -42,6 +42,8 @@
             this.label_slope = new System.Windows.Forms.Label();
             this.textBox_chamberSlope = new System.Windows.Forms.TextBox();
             this.dataGridView_Schedule = new System.Windows.Forms.DataGridView();
+            this.button_read = new System.Windows.Forms.Button();
+            this.label_chamber = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView_Schedule)).BeginInit();
             this.SuspendLayout();
             // 
@@ -76,7 +78,7 @@
             // 
             // textBox_chamberTemp
             // 
-            this.textBox_chamberTemp.Location = new System.Drawing.Point(86, 41);
+            this.textBox_chamberTemp.Location = new System.Drawing.Point(90, 92);
             this.textBox_chamberTemp.Name = "textBox_chamberTemp";
             this.textBox_chamberTemp.Size = new System.Drawing.Size(100, 22);
             this.textBox_chamberTemp.TabIndex = 3;
@@ -93,7 +95,7 @@
             // 
             // textBox_chamberHum
             // 
-            this.textBox_chamberHum.Location = new System.Drawing.Point(86, 70);
+            this.textBox_chamberHum.Location = new System.Drawing.Point(90, 121);
             this.textBox_chamberHum.Name = "textBox_chamberHum";
             this.textBox_chamberHum.Size = new System.Drawing.Size(100, 22);
             this.textBox_chamberHum.TabIndex = 5;
@@ -101,7 +103,7 @@
             // label_temperatureChamber
             // 
             this.label_temperatureChamber.AutoSize = true;
-            this.label_temperatureChamber.Location = new System.Drawing.Point(7, 44);
+            this.label_temperatureChamber.Location = new System.Drawing.Point(11, 95);
             this.label_temperatureChamber.Name = "label_temperatureChamber";
             this.label_temperatureChamber.Size = new System.Drawing.Size(70, 12);
             this.label_temperatureChamber.TabIndex = 6;
@@ -110,7 +112,7 @@
             // label_hum
             // 
             this.label_hum.AutoSize = true;
-            this.label_hum.Location = new System.Drawing.Point(7, 73);
+            this.label_hum.Location = new System.Drawing.Point(11, 124);
             this.label_hum.Name = "label_hum";
             this.label_hum.Size = new System.Drawing.Size(55, 12);
             this.label_hum.TabIndex = 7;
@@ -119,7 +121,7 @@
             // label_slope
             // 
             this.label_slope.AutoSize = true;
-            this.label_slope.Location = new System.Drawing.Point(7, 101);
+            this.label_slope.Location = new System.Drawing.Point(11, 152);
             this.label_slope.Name = "label_slope";
             this.label_slope.Size = new System.Drawing.Size(37, 12);
             this.label_slope.TabIndex = 8;
@@ -127,7 +129,7 @@
             // 
             // textBox_chamberSlope
             // 
-            this.textBox_chamberSlope.Location = new System.Drawing.Point(86, 98);
+            this.textBox_chamberSlope.Location = new System.Drawing.Point(90, 149);
             this.textBox_chamberSlope.Name = "textBox_chamberSlope";
             this.textBox_chamberSlope.Size = new System.Drawing.Size(100, 22);
             this.textBox_chamberSlope.TabIndex = 9;
@@ -135,17 +137,38 @@
             // dataGridView_Schedule
             // 
             this.dataGridView_Schedule.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView_Schedule.Location = new System.Drawing.Point(9, 127);
+            this.dataGridView_Schedule.Location = new System.Drawing.Point(9, 182);
             this.dataGridView_Schedule.Name = "dataGridView_Schedule";
             this.dataGridView_Schedule.RowTemplate.Height = 24;
             this.dataGridView_Schedule.Size = new System.Drawing.Size(345, 227);
             this.dataGridView_Schedule.TabIndex = 10;
             // 
+            // button_read
+            // 
+            this.button_read.Location = new System.Drawing.Point(276, 99);
+            this.button_read.Name = "button_read";
+            this.button_read.Size = new System.Drawing.Size(75, 22);
+            this.button_read.TabIndex = 11;
+            this.button_read.Text = "Read";
+            this.button_read.UseVisualStyleBackColor = true;
+            this.button_read.Click += new System.EventHandler(this.button_read_Click);
+            // 
+            // label_chamber
+            // 
+            this.label_chamber.AutoSize = true;
+            this.label_chamber.Location = new System.Drawing.Point(7, 40);
+            this.label_chamber.Name = "label_chamber";
+            this.label_chamber.Size = new System.Drawing.Size(51, 12);
+            this.label_chamber.TabIndex = 12;
+            this.label_chamber.Text = "Chamber:";
+            // 
             // Terchy
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(363, 360);
+            this.ClientSize = new System.Drawing.Size(363, 417);
+            this.Controls.Add(this.label_chamber);
+            this.Controls.Add(this.button_read);
             this.Controls.Add(this.dataGridView_Schedule);
             this.Controls.Add(this.textBox_chamberSlope);
             this.Controls.Add(this.label_slope);
@@ -180,6 +203,8 @@
         private System.Windows.Forms.Label label_slope;
         private System.Windows.Forms.TextBox textBox_chamberSlope;
         private System.Windows.Forms.DataGridView dataGridView_Schedule;
+        private System.Windows.Forms.Button button_read;
+        private System.Windows.Forms.Label label_chamber;
     }
 }
 
