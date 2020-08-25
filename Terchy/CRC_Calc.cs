@@ -167,6 +167,31 @@ namespace Terchy
             string CRC_calu = " " + crcHigh + " " + crcLow;   //原始資料加入CRC
             return CRC_calu;
         }
+
+        public static string S8521_modbus(string command, int value)
+        {
+            string return_value, crc16_value, hex_value, crc_low, crc_high;
+            if (value >= 0)   //正值
+            {
+                hex_value = Convert.ToString(value, 16).PadLeft(4, '0');
+                crc_low = hex_value.Substring(0, 2);     //低位數
+                crc_high = hex_value.Substring(2);       //高位數
+                return_value = command + " " + crc_low + " " + crc_high;
+                crc16_value = Crc16.PID_CRC16(return_value);
+                return_value += crc16_value;
+            }
+            else
+            {
+                value = 65536 + value;
+                hex_value = Convert.ToString(value, 16).PadLeft(4, 'F');
+                crc_low = hex_value.Substring(0, 2);     //低位數
+                crc_high = hex_value.Substring(2);       //高位數
+                return_value = command + " " + crc_low + " " + crc_high;
+                crc16_value = Crc16.PID_CRC16(return_value);
+                return_value += crc16_value;
+            }
+            return return_value;
+        }
     }
 
     

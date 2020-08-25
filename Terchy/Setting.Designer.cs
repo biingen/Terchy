@@ -52,7 +52,7 @@
             // label_serialPort_status
             // 
             this.label_serialPort_status.AutoSize = true;
-            this.label_serialPort_status.Location = new System.Drawing.Point(7, 16);
+            this.label_serialPort_status.Location = new System.Drawing.Point(7, 41);
             this.label_serialPort_status.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_serialPort_status.Name = "label_serialPort_status";
             this.label_serialPort_status.Size = new System.Drawing.Size(75, 12);
@@ -66,7 +66,7 @@
             this.groupBox_serialPort2.Controls.Add(this.comboBox_serialPort2_portname);
             this.groupBox_serialPort2.Controls.Add(this.label_serialPort2_baudrate);
             this.groupBox_serialPort2.Controls.Add(this.label_serialPort2_portname);
-            this.groupBox_serialPort2.Location = new System.Drawing.Point(4, 163);
+            this.groupBox_serialPort2.Location = new System.Drawing.Point(4, 188);
             this.groupBox_serialPort2.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox_serialPort2.Name = "groupBox_serialPort2";
             this.groupBox_serialPort2.Padding = new System.Windows.Forms.Padding(4);
@@ -150,7 +150,7 @@
             this.groupBox_serialPort1.Controls.Add(this.comboBox_serialPort1_portname);
             this.groupBox_serialPort1.Controls.Add(this.label_serialPort1_baudrate);
             this.groupBox_serialPort1.Controls.Add(this.label_serialPort1_portname);
-            this.groupBox_serialPort1.Location = new System.Drawing.Point(4, 36);
+            this.groupBox_serialPort1.Location = new System.Drawing.Point(4, 61);
             this.groupBox_serialPort1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox_serialPort1.Name = "groupBox_serialPort1";
             this.groupBox_serialPort1.Padding = new System.Windows.Forms.Padding(4);
@@ -229,7 +229,7 @@
             // 
             // textBox_Schedule
             // 
-            this.textBox_Schedule.Location = new System.Drawing.Point(4, 289);
+            this.textBox_Schedule.Location = new System.Drawing.Point(4, 9);
             this.textBox_Schedule.Name = "textBox_Schedule";
             this.textBox_Schedule.Size = new System.Drawing.Size(178, 22);
             this.textBox_Schedule.TabIndex = 72;
@@ -237,7 +237,7 @@
             // 
             // button_Schedule
             // 
-            this.button_Schedule.Location = new System.Drawing.Point(188, 289);
+            this.button_Schedule.Location = new System.Drawing.Point(188, 9);
             this.button_Schedule.Name = "button_Schedule";
             this.button_Schedule.Size = new System.Drawing.Size(75, 23);
             this.button_Schedule.TabIndex = 73;
@@ -253,7 +253,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(267, 362);
+            this.ClientSize = new System.Drawing.Size(267, 312);
             this.Controls.Add(this.button_Schedule);
             this.Controls.Add(this.textBox_Schedule);
             this.Controls.Add(this.label_serialPort_status);
