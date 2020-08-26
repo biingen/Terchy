@@ -42,9 +42,11 @@
             this.label_slope = new System.Windows.Forms.Label();
             this.textBox_chamberSlope = new System.Windows.Forms.TextBox();
             this.dataGridView_Schedule = new System.Windows.Forms.DataGridView();
-            this.button_read = new System.Windows.Forms.Button();
             this.label_chamber = new System.Windows.Forms.Label();
+            this.timer_chamber = new System.Windows.Forms.Timer(this.components);
+            this.groupBox_chamber = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView_Schedule)).BeginInit();
+            this.groupBox_chamber.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_setting
@@ -78,16 +80,16 @@
             // 
             // textBox_chamberTemp
             // 
-            this.textBox_chamberTemp.Location = new System.Drawing.Point(90, 92);
+            this.textBox_chamberTemp.Location = new System.Drawing.Point(86, 20);
             this.textBox_chamberTemp.Name = "textBox_chamberTemp";
-            this.textBox_chamberTemp.Size = new System.Drawing.Size(100, 22);
+            this.textBox_chamberTemp.Size = new System.Drawing.Size(56, 22);
             this.textBox_chamberTemp.TabIndex = 3;
             // 
             // button_set
             // 
-            this.button_set.Location = new System.Drawing.Point(276, 70);
+            this.button_set.Location = new System.Drawing.Point(148, 21);
             this.button_set.Name = "button_set";
-            this.button_set.Size = new System.Drawing.Size(75, 22);
+            this.button_set.Size = new System.Drawing.Size(47, 22);
             this.button_set.TabIndex = 4;
             this.button_set.Text = "Set";
             this.button_set.UseVisualStyleBackColor = true;
@@ -95,15 +97,15 @@
             // 
             // textBox_chamberHum
             // 
-            this.textBox_chamberHum.Location = new System.Drawing.Point(90, 121);
+            this.textBox_chamberHum.Location = new System.Drawing.Point(86, 49);
             this.textBox_chamberHum.Name = "textBox_chamberHum";
-            this.textBox_chamberHum.Size = new System.Drawing.Size(100, 22);
+            this.textBox_chamberHum.Size = new System.Drawing.Size(56, 22);
             this.textBox_chamberHum.TabIndex = 5;
             // 
             // label_temperatureChamber
             // 
             this.label_temperatureChamber.AutoSize = true;
-            this.label_temperatureChamber.Location = new System.Drawing.Point(11, 95);
+            this.label_temperatureChamber.Location = new System.Drawing.Point(7, 23);
             this.label_temperatureChamber.Name = "label_temperatureChamber";
             this.label_temperatureChamber.Size = new System.Drawing.Size(70, 12);
             this.label_temperatureChamber.TabIndex = 6;
@@ -112,7 +114,7 @@
             // label_hum
             // 
             this.label_hum.AutoSize = true;
-            this.label_hum.Location = new System.Drawing.Point(11, 124);
+            this.label_hum.Location = new System.Drawing.Point(7, 52);
             this.label_hum.Name = "label_hum";
             this.label_hum.Size = new System.Drawing.Size(55, 12);
             this.label_hum.TabIndex = 7;
@@ -121,7 +123,7 @@
             // label_slope
             // 
             this.label_slope.AutoSize = true;
-            this.label_slope.Location = new System.Drawing.Point(11, 152);
+            this.label_slope.Location = new System.Drawing.Point(7, 80);
             this.label_slope.Name = "label_slope";
             this.label_slope.Size = new System.Drawing.Size(37, 12);
             this.label_slope.TabIndex = 8;
@@ -129,9 +131,9 @@
             // 
             // textBox_chamberSlope
             // 
-            this.textBox_chamberSlope.Location = new System.Drawing.Point(90, 149);
+            this.textBox_chamberSlope.Location = new System.Drawing.Point(86, 77);
             this.textBox_chamberSlope.Name = "textBox_chamberSlope";
-            this.textBox_chamberSlope.Size = new System.Drawing.Size(100, 22);
+            this.textBox_chamberSlope.Size = new System.Drawing.Size(56, 22);
             this.textBox_chamberSlope.TabIndex = 9;
             // 
             // dataGridView_Schedule
@@ -143,16 +145,6 @@
             this.dataGridView_Schedule.Size = new System.Drawing.Size(345, 227);
             this.dataGridView_Schedule.TabIndex = 10;
             // 
-            // button_read
-            // 
-            this.button_read.Location = new System.Drawing.Point(276, 99);
-            this.button_read.Name = "button_read";
-            this.button_read.Size = new System.Drawing.Size(75, 22);
-            this.button_read.TabIndex = 11;
-            this.button_read.Text = "Read";
-            this.button_read.UseVisualStyleBackColor = true;
-            this.button_read.Click += new System.EventHandler(this.button_read_Click);
-            // 
             // label_chamber
             // 
             this.label_chamber.AutoSize = true;
@@ -162,27 +154,43 @@
             this.label_chamber.TabIndex = 12;
             this.label_chamber.Text = "Chamber:";
             // 
+            // timer_chamber
+            // 
+            this.timer_chamber.Interval = 1000;
+            this.timer_chamber.Tick += new System.EventHandler(this.timer_chamber_Tick);
+            // 
+            // groupBox_chamber
+            // 
+            this.groupBox_chamber.Controls.Add(this.textBox_chamberHum);
+            this.groupBox_chamber.Controls.Add(this.textBox_chamberTemp);
+            this.groupBox_chamber.Controls.Add(this.textBox_chamberSlope);
+            this.groupBox_chamber.Controls.Add(this.button_set);
+            this.groupBox_chamber.Controls.Add(this.label_slope);
+            this.groupBox_chamber.Controls.Add(this.label_temperatureChamber);
+            this.groupBox_chamber.Controls.Add(this.label_hum);
+            this.groupBox_chamber.Location = new System.Drawing.Point(9, 70);
+            this.groupBox_chamber.Name = "groupBox_chamber";
+            this.groupBox_chamber.Size = new System.Drawing.Size(200, 106);
+            this.groupBox_chamber.TabIndex = 13;
+            this.groupBox_chamber.TabStop = false;
+            this.groupBox_chamber.Text = "Chamber setting";
+            // 
             // Terchy
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(363, 417);
+            this.Controls.Add(this.groupBox_chamber);
             this.Controls.Add(this.label_chamber);
-            this.Controls.Add(this.button_read);
-            this.Controls.Add(this.dataGridView_Schedule);
-            this.Controls.Add(this.textBox_chamberSlope);
-            this.Controls.Add(this.label_slope);
-            this.Controls.Add(this.label_hum);
-            this.Controls.Add(this.label_temperatureChamber);
-            this.Controls.Add(this.textBox_chamberHum);
-            this.Controls.Add(this.button_set);
-            this.Controls.Add(this.textBox_chamberTemp);
             this.Controls.Add(this.label_temperatureRec);
             this.Controls.Add(this.button_start);
             this.Controls.Add(this.button_setting);
+            this.Controls.Add(this.dataGridView_Schedule);
             this.Name = "Terchy";
             this.Text = "Terchy";
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView_Schedule)).EndInit();
+            this.groupBox_chamber.ResumeLayout(false);
+            this.groupBox_chamber.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -203,8 +211,9 @@
         private System.Windows.Forms.Label label_slope;
         private System.Windows.Forms.TextBox textBox_chamberSlope;
         private System.Windows.Forms.DataGridView dataGridView_Schedule;
-        private System.Windows.Forms.Button button_read;
         private System.Windows.Forms.Label label_chamber;
+        private System.Windows.Forms.Timer timer_chamber;
+        private System.Windows.Forms.GroupBox groupBox_chamber;
     }
 }
 

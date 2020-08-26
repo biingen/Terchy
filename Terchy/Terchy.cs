@@ -331,6 +331,61 @@ namespace Terchy
             }
         }
 
+        const int byteChamber_max = 36;
+        byte[] byteChamber = new byte[byteChamber_max];
+        int byteChamber_length = 0;
+
+        private void chamber_recorder(byte ch)
+        {
+            const int packet_len = 9;
+            const int header_data1_offset = -9;
+            const int header_data2_offset = -8;
+            const int length_data_offset = -7;
+            const int data_actual2_offset = -6;
+            const int data_actual1_offset = -5;
+            const int data_target2_offset = -4;
+            const int data_target1_offset = -3;
+            const int crc16_highbit_offset = -2;
+            const int crc16_lowbit_offset = -1;
+            const int unit = 100;
+
+            // If data_buffer is too long, cut off data not needed
+            if (byteChamber_length >= byteChamber_max)
+            {
+                int destinationIndex = 0;
+                for (int i = (byteTemperature_max - packet_len); i < byteTemperature_max; i++)
+                {
+                    byteChamber[destinationIndex++] = byteChamber[i];
+                }
+                byteChamber_length = destinationIndex;
+            }
+
+            byteChamber[byteChamber_length] = ch;
+            byteChamber_length++;
+
+            if (byteChamber_length == 9)
+            {
+                if ((byteChamber[byteChamber_length + header_data1_offset] == 0x01) &&
+                    (byteChamber[byteChamber_length + header_data2_offset] == 0x03) &&
+                    (byteChamber[byteChamber_length + length_data_offset] == 0x04))
+                {
+                    byte[] byteActual = new byte[2];
+                    byte[] byteTarget = new byte[2];
+                    byteActual[0] = byteChamber[byteChamber_length + data_actual2_offset];
+                    byteActual[1] = byteChamber[byteChamber_length + data_actual1_offset];
+                    byteTarget[0] = byteChamber[byteChamber_length + data_target2_offset];
+                    byteTarget[1] = byteChamber[byteChamber_length + data_target1_offset];
+                    string stringActual = BitConverter.ToString(byteActual).Replace("-", "");
+                    string stringTarget = BitConverter.ToString(byteTarget).Replace("-", "");
+                    float CH_actualTemperature = StrToFloat(Convert.ToInt32(stringActual, 16));
+                    float CH_targetTemperature = StrToFloat(Convert.ToInt32(stringTarget, 16));
+                    string dataValue = "Actual= " + (CH_actualTemperature / unit).ToString("#0.00") + " °C, Target= " + (CH_targetTemperature / unit).ToString("#0.00") + " °C";
+                    UpdateUI("Chamber: " + dataValue, label_chamber);
+                    byteChamber_length = 0;
+                }
+            }
+        }
+
         //執行緒控制label.text
         private delegate void UpdateUICallBack_Text(string value, Control ctl);
         private void UpdateUI(string value, Control ctl)
@@ -403,6 +458,7 @@ namespace Terchy
                 }
 
                 MainThread.Start();
+                timer_chamber.Enabled = true;
             }
             else
             {
@@ -419,6 +475,7 @@ namespace Terchy
                 }
 
                 MainThread.Abort();
+                timer_chamber.Enabled = false;
             }
         }
 
@@ -493,68 +550,12 @@ namespace Terchy
             }
         }
 
-        private void button_read_Click(object sender, EventArgs e)
+        private void timer_chamber_Tick(object sender, EventArgs e)
         {
             string chamberCommand = Crc16.S8521_modbus("01 03 00 00", 02); //Read chamber temperature
             byte[] Outputbytes = new byte[chamberCommand.Split(' ').Count()];
             Outputbytes = HexConverter.StrToByte(chamberCommand);
             serialPort2.Write(Outputbytes, 0, Outputbytes.Length); //發送數據 Rs232 + Crc16
-        }
-
-        const int byteChamber_max = 36;
-        byte[] byteChamber = new byte[byteChamber_max];
-        int byteChamber_length = 0;
-
-        private void chamber_recorder(byte ch)
-        {
-            const int packet_len = 9;
-            const int header_data1_offset = -9;
-            const int header_data2_offset = -8;
-            const int length_data_offset = -7;
-            const int data_actual2_offset = -6;
-            const int data_actual1_offset = -5;
-            const int data_target2_offset = -4;
-            const int data_target1_offset = -3;
-            const int crc16_highbit_offset = -2;
-            const int crc16_lowbit_offset = -1;
-            const int unit = 100;
-
-            // If data_buffer is too long, cut off data not needed
-            if (byteChamber_length >= byteChamber_max)
-            {
-                int destinationIndex = 0;
-                for (int i = (byteTemperature_max - packet_len); i < byteTemperature_max; i++)
-                {
-                    byteChamber[destinationIndex++] = byteChamber[i];
-                }
-                byteChamber_length = destinationIndex;
-            }
-
-            byteChamber[byteChamber_length] = ch;
-            byteChamber_length++;
-
-            if (byteChamber_length == 9)
-            {
-                if ((byteChamber[byteChamber_length + header_data1_offset] == 0x01) &&
-                    (byteChamber[byteChamber_length + header_data2_offset] == 0x03) &&
-                    (byteChamber[byteChamber_length + length_data_offset] == 0x04))
-                {
-                    byte[] byteActual = new byte[2];
-                    byte[] byteTarget = new byte[2];
-                    byteActual[0] = byteChamber[byteChamber_length + data_actual2_offset];
-                    byteActual[1] = byteChamber[byteChamber_length + data_actual1_offset];
-                    byteTarget[0] = byteChamber[byteChamber_length + data_target2_offset];
-                    byteTarget[1] = byteChamber[byteChamber_length + data_target1_offset];
-                    string stringActual = BitConverter.ToString(byteActual).Replace("-", "");
-                    string stringTarget = BitConverter.ToString(byteTarget).Replace("-", "");
-                    float CH_actualTemperature = StrToFloat(Convert.ToInt32(stringActual, 16) / unit);
-                    float CH_targetTemperature = StrToFloat(Convert.ToInt32(stringTarget, 16) / unit);
-                    string dataValue = "Actual=" + CH_actualTemperature.ToString("#0.00") + ", Target=" + CH_targetTemperature.ToString("#0.00");
-                    UpdateUI("Chamber: " + dataValue, label_chamber);
-                    byteChamber_length = 0;
-                }
-            }
-
         }
 
         public float StrToFloat(object FloatString)
